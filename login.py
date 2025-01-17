@@ -35,14 +35,14 @@ def button_function():
 def button_function():
     try:
         app.destroy() 
-        subprocess.run(["python", "./PostPilot/app_02.py"], check=True)
+        subprocess.run(["python", "./app_02.py"], check=True)
     except FileNotFoundError:
         print("O arquivo app_02.py não foi encontrado.")
     except subprocess.CalledProcessError as e:
         print(f"Ocorreu um erro ao executar o script: {e}")
 
 
-img1=ImageTk.PhotoImage(Image.open("./PostPilot/assets/pattern.png"))
+img1=ImageTk.PhotoImage(Image.open("./assets/pattern.png"))
 l1=customtkinter.CTkLabel(master=app,image=img1)
 l1.pack()
 
@@ -67,18 +67,13 @@ button1 = customtkinter.CTkButton(master=frame, width=220, text="Login", command
 button1.place(x=50, y=240)
 
 
-img2 = customtkinter.CTkImage(Image.open("./PostPilot/assets/Google__G__Logo.svg.webp").resize((20, 20), Image.Resampling.LANCZOS))
-img3 = customtkinter.CTkImage(Image.open("./PostPilot/assets/124010.png").resize((20, 20), Image.Resampling.LANCZOS))
+img2 = customtkinter.CTkImage(Image.open("./assets/Google__G__Logo.svg.webp").resize((20, 20), Image.Resampling.LANCZOS))
+img3 = customtkinter.CTkImage(Image.open("./assets/124010.png").resize((20, 20), Image.Resampling.LANCZOS))
 
 button2= customtkinter.CTkButton(master=frame, image=img2, text="Google", width=100, height=20, compound="left", fg_color='white', text_color='black', hover_color='#AFAFAF')
 button2.place(x=50, y=290)
 
 button3= customtkinter.CTkButton(master=frame, image=img3, text="Facebook", width=100, height=20, compound="left", fg_color='white', text_color='black', hover_color='#AFAFAF')
 button3.place(x=170, y=290)
-
-
-
-
-# You can easily integrate authentication system 
 
 app.mainloop()

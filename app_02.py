@@ -359,7 +359,7 @@ def create_menu():
         {"name": "Facebook", "filename": "facebook.png"},
     ]
 
-    icon_dir = "./PostPilot/icons"
+    icon_dir = "./icons"
     selected_networks = []
 
     def toggle_network(network):
