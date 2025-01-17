@@ -2,6 +2,9 @@
 
 **PostPilot** é uma ferramenta de automação para postagem em múltiplas redes sociais, com foco em plataformas que suportam vídeos longos, como YouTube, TikTok, e muito mais. O objetivo do projeto é simplificar o processo de upload e gestão de conteúdos em várias plataformas, otimizando tempo e recursos.
 
+<img src="https://github.com/user-attachments/assets/06a118ca-19dc-48a0-894e-2ff03de5921a" alt="Image" width="500">
+<img src="https://github.com/user-attachments/assets/5b4125f8-fdfb-4e5d-bc21-40b2c069d973" alt="Image" width="500">
+
 ## 🚧 Estado do Projeto
 
 O PostPilot está em sua **versão 1.0.0-beta**, o que significa que ainda está em desenvolvimento. A interface gráfica e as funcionalidades de automação não estão completamente consolidadas e podem apresentar limitações. Contribuições são bem-vindas para melhorar o projeto e torná-lo mais estável e funcional.
