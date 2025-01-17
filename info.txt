@@ -1,0 +1,55 @@
+Instruções para usar o PostPilot com o script `install_dependencies.py`
+
+Este script ajuda a configurar o ambiente necessário para rodar o PostPilot. Ele instala as dependências do Python, verifica se o Google Chrome está instalado e, caso necessário, instala o Chrome e o ChromeDriver.
+
+Passos para instalar e configurar o ambiente:
+
+1. **Instalar as dependências do Python:**
+O script `install_dependencies.py` instala automaticamente as bibliotecas necessárias para executar o PostPilot. Você precisa ter o Python instalado em sua máquina. Se não tiver o Python, baixe e instale a versão mais recente no site oficial do Python.
+
+Bibliotecas que serão instaladas:
+- selenium - Para controlar o navegador.
+- webdriver-manager - Para gerenciar a instalação do ChromeDriver.
+- customtkinter - Para criar interfaces gráficas.
+- tkcalendar - Para usar calendários no Tkinter.
+- Pillow (PIL) - Para manipulação de imagens.
+
+Para instalar as dependências, siga os passos abaixo:
+1. Abra o terminal ou prompt de comando.
+2. Navegue até o diretório onde o script `install_dependencies.py` está localizado.
+3. Execute o script digitando o seguinte comando:
+
+python install_dependencies.py
+
+2. **Verificar se o Google Chrome está instalado:**
+O script irá verificar se o Google Chrome já está instalado na sua máquina. Caso o Chrome não esteja instalado, o script tentará instalar o Google Chrome automaticamente.
+
+Se o Google Chrome não estiver instalado:
+- O script irá baixar e instalar o Chrome através do repositório oficial do Ubuntu, caso você esteja usando uma distribuição baseada no Debian/Ubuntu.
+
+3. **Instalar o ChromeDriver:**
+O script irá instalar o ChromeDriver necessário para o Selenium, utilizando o `webdriver-manager`.
+
+Passos para usar o PostPilot após instalar as dependências:
+
+1. **Configuração do ambiente:**
+Certifique-se de que o Google Chrome está instalado corretamente. O script de instalação automatiza esse processo, mas se houver algum problema, você pode verificar manualmente se o Chrome está na versão mais recente. A automação ocorre utilizando um perfil específico do Chrome para garantir que o login e outras configurações sejam persistentes entre as execuções.
+
+2. **Configuração do código Python:**
+- O PostPilot exige que você forneça alguns detalhes no código, como os caminhos dos arquivos de vídeo, miniatura e outros parâmetros.
+- Alterações podem ser feitas diretamente no arquivo Python (`app_01.py`), onde você deve ajustar os caminhos para os arquivos que deseja enviar.
+
+3. **Executar o script:**
+Após configurar o ambiente e os arquivos corretamente, execute o script Python do PostPilot com o seguinte comando:
+
+python app_01.py
+
+4. **Login no YouTube:**
+O script irá tentar fazer login automaticamente usando um perfil do Chrome. Certifique-se de que você esteja logado no YouTube antes de executar o script.
+
+5. **Upload de Vídeo:**
+O script irá abrir o Chrome, navegar até a página de upload do YouTube, e automatizar o processo de envio do vídeo, incluindo o preenchimento de título, descrição e miniatura.
+
+Observações:
+- Caso o script não consiga instalar o Google Chrome ou o ChromeDriver corretamente, consulte as mensagens de erro no terminal para obter mais informações.
+- Certifique-se de que o `pip` está atualizado em sua máquina para evitar problemas durante a instalação das dependências.
