@@ -303,7 +303,6 @@ def upload_cos_tv(video_path, title, description, tags, thumbnail_path):
     except Exception as e:
         messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
 
-
 # ========================================================================
 #                          FUNÇÕES AUXILIARES
 # ========================================================================
@@ -331,233 +330,6 @@ def select_file(entry):
     filepath = filedialog.askopenfilename()
     entry.delete(0, ctk.END)
     entry.insert(0, filepath)
-
-'''
-# ------------------------------------------------------------------------------
-#                      MENU / YouTube
-# ------------------------------------------------------------------------------
-
-def youtube_interface(right_frame):
-    # Adicionar um Scrollable Frame
-    scrollable_frame = ctk.CTkScrollableFrame(right_frame, width=1200, height=650)
-    scrollable_frame.grid(row=0, column=0, padx=10, pady=10, columnspan=3, sticky="nsew")
-
-    # Caminho do Vídeo
-    ctk.CTkLabel(scrollable_frame, text="Caminho do Vídeo:").grid(row=1, column=0, padx=10, pady=5, sticky="w")
-    video_entry = ctk.CTkEntry(scrollable_frame, width=400)
-    video_entry.grid(row=1, column=1, padx=10, pady=5)
-    ctk.CTkButton(scrollable_frame, text="Selecionar", command=lambda: select_file(video_entry)).grid(row=1, column=2, padx=10, pady=5, sticky="w")
-
-    # Caminho da Miniatura
-    ctk.CTkLabel(scrollable_frame, text="Miniatura:").grid(row=2, column=0, padx=10, pady=5, sticky="w")
-    miniatura_var = ctk.IntVar(value=0) 
-    miniatura_radiobutton_1 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Fazer upload do arquivo",
-        variable=miniatura_var,
-        value=1,
-    )
-    miniatura_radiobutton_1.grid(row=2, column=1, padx=10, pady=5, sticky="w")
-
-    miniatura_radiobutton_2 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Gerada automaticamente",
-        variable=miniatura_var,
-        value=2
-    )
-    miniatura_radiobutton_2.grid(row=3, column=1, padx=10, pady=5, sticky="w")
-
-    miniatura_radiobutton_3 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Testar e comparar",
-        variable=miniatura_var,
-        value=3
-    )
-    miniatura_radiobutton_3.grid(row=4, column=1, padx=10, pady=5, sticky="w")
-
-    # Título
-    ctk.CTkLabel(scrollable_frame, text="Título:").grid(row=6, column=0, padx=10, pady=5, sticky="w")
-    title_entry = ctk.CTkEntry(scrollable_frame, width=400)
-    title_entry.grid(row=6, column=1, padx=10, pady=5)
-
-    # Descrição
-    ctk.CTkLabel(scrollable_frame, text="Descrição:").grid(row=7, column=0, padx=10, pady=5, sticky="w")
-    description_entry = ctk.CTkTextbox(scrollable_frame, width=400, height=100)  # Ajuste a altura
-    description_entry.grid(row=7, column=1, padx=10, pady=5)
-
-    # Público
-    ctk.CTkLabel(scrollable_frame, text="Público:").grid(row=8, column=0, padx=10, pady=5, sticky="w")
-    audience_var = ctk.IntVar(value=0)
-    audience_radiobutton_1 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Sim, é conteúdo para crianças",
-        variable=audience_var,
-        value=1
-    )
-    audience_radiobutton_1.grid(row=8, column=1, padx=10, pady=5, sticky="w")   
-    audience_radiobutton_2 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Não é conteúdo para crianças",
-        variable=audience_var,
-        value=2
-    )
-    audience_radiobutton_2.grid(row=9, column=1, padx=10, pady=5, sticky="w")
-
-    # Restrição ao Público Adulto
-    ctk.CTkLabel(scrollable_frame, text="Restringir ao Público Adulto:").grid(row=10, column=0, padx=10, pady=5, sticky="w")
-    adult_var = ctk.IntVar(value=0)
-    adult_radiobutton_1 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Sim, restringir meu vídeo a espectadores maiores de 18 anos",
-        variable=adult_var,
-        value=1
-    )
-    adult_radiobutton_1.grid(row=10, column=1, padx=10, pady=5, sticky="w")
-    adult_radiobutton_2 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Não, não restrinja meu vídeo apenas a espectadores maiores de 18 anos",
-        variable=adult_var,
-        value=2
-    )
-    adult_radiobutton_2.grid(row=11, column=1, padx=10, pady=5, sticky="w")
-
-    # Conteúdo alterado
-    ctk.CTkLabel(scrollable_frame, text="Conteúdo alterado:").grid(row=12, column=0, padx=10, pady=5, sticky="w")
-    adult_var = ctk.IntVar(value=0)
-    adult_radiobutton_1 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Sim",
-        variable=adult_var,
-        value=1
-    )
-    adult_radiobutton_1.grid(row=12, column=1, padx=10, pady=5, sticky="w")
-    adult_radiobutton_2 = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Não",
-        variable=adult_var,
-        value=2
-    )
-    adult_radiobutton_2.grid(row=13, column=1, padx=10, pady=5, sticky="w")
-
-    # Tags do vídeo
-    ctk.CTkLabel(scrollable_frame, text="Tags:").grid(row=14, column=0, padx=10, pady=5, sticky="w")
-    tags_entry = ctk.CTkTextbox(scrollable_frame, width=400, height=50)
-    tags_entry.grid(row=14, column=1, padx=10, pady=5)
-
-    # Categoria
-    ctk.CTkLabel(scrollable_frame, text="Categoria:").grid(row=15, column=0, padx=10, pady=5, sticky="w")
-    category_entry = ctk.CTkOptionMenu(scrollable_frame,
-                                       values=["Automóveis e veículos", "Comédia", "Educação", "Entretenimento", "Filme e Animação",
-                                               "Jogos", "Como fazer e estilo", "Música", "Notícias e Política",
-                                               "Organizações sem fins lucrativos e ativisrno", "Pessoas e Blogs", 
-                                               "Animais de estimação e animais", "Ciência e Tecnologia", "Esportes", "Viagens e Eventos"]
-                                       )
-    category_entry.grid(row=15, column=1, padx=10, pady=5, sticky="w")
-    category_entry.set("Escolha a Categoria")
-
-    def check_visibility():
-        if visibility_var.get() == 4:
-            print("ENTROU | CORRETO!")
-
-    # Visibilidade
-    ctk.CTkLabel(scrollable_frame, text="Salvar ou Publicar:").grid(row=16, column=0, padx=10, pady=5, sticky="w")
-    visibility_var = ctk.IntVar(value=0)
-    visibility_entry = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Público",
-        variable=visibility_var,
-        value=1,
-        command=check_visibility
-    ).grid(row=16, column=1, padx=10, pady=5, sticky="w")
-
-    visibility_entry = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Não listado",
-        variable=visibility_var,
-        value=2,
-        command=check_visibility
-    ).grid(row=17, column=1, padx=10, pady=5, sticky="w")
-
-    visibility_entry = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Privado",
-        variable=visibility_var,
-        value=3,
-        command=check_visibility
-    ).grid(row=18, column=1, padx=10, pady=5, sticky="w")    
-
-    visibility_entry = ctk.CTkRadioButton(
-        scrollable_frame,
-        text="Agendar",
-        variable=visibility_var,
-        value=4,
-        command=check_visibility
-    ).grid(row=19, column=1, padx=10, pady=5, sticky="w")   
-
-    # Botão de postar
-    ctk.CTkButton(
-        scrollable_frame,
-        text="Iniciar Upload",
-        command=lambda: youtube_interface(
-            # url_upload.get(),
-            video_entry.get(),
-            title_entry.get(),
-            description_entry.get(),
-        )
-    ).grid(row=20, column=0, columnspan=3, pady=20)
-
-def post_automatically(selected_networks):
-    """Simula a postagem automática."""
-    if not selected_networks:
-        messagebox.showwarning("Atenção", "Por favor, selecione pelo menos uma rede social para automação!")
-    else:
-        messagebox.showinfo("Postagem Automática", f"As seguintes redes serão automatizadas: {', '.join(selected_networks)}")
-
-# ------------------------------------------------------------------------------
-#                      HORA E DIA
-# ------------------------------------------------------------------------------
-
-def select_day():
-    """Exibe o dia atual em uma mensagem."""
-    today = date.today()
-    messagebox.showinfo("Dia Atual", f"Hoje é {today.strftime('%d/%m/%Y')}")  # Formato: DD/MM/AAAA
-
-def open_calendar_day(entry):
-    """Abre um calendário para escolher o dia."""
-    def set_day():
-        selected_date = calendar.selection_get()
-        entry.delete(0, ctk.END)
-        entry.insert(0, selected_date.strftime('%d/%m/%Y'))  # Formato do dia selecionado
-        calendar_window.destroy()
-
-    calendar_window = ctk.Toplevel()
-    calendar_window.title("Selecione o Dia")
-
-    # Adicionar calendário
-    calendar = Calendar(calendar_window, date_pattern="dd/mm/yyyy")
-    calendar.pack(pady=20)
-
-    # Botão de seleção
-    ctk.Button(calendar_window, text="Selecionar", command=set_day).pack(pady=10)
-
-    # Campo de entrada para exibir o dia
-    day_entry = ctk.CTkEntry(ctk, width=300)
-    day_entry.grid(row=0, column=0, padx=10, pady=10)
-
-    # Botão para exibir o dia atual
-    day_button = ctk.CTkButton(
-        text="Exibir Dia Atual",
-        command=select_day
-    )
-    day_button.grid(row=1, column=0, padx=10, pady=10)
-
-    # Botão para abrir o calendário e escolher o dia
-    calendar_button = ctk.CTkButton(
-        text="Escolher Dia",
-        command=lambda: open_calendar_day(day_entry)
-    )
-    calendar_button.grid(row=1, column=1, padx=10, pady=10)
-'''
 
 # ------------------------------------------------------------------------------  
 #            Função para abrir a janela de configurações de usuario
@@ -669,7 +441,13 @@ def create_menu():
     right_frame = ctk.CTkFrame(frame, border_color='#cccccc', border_width=0)
     right_frame.pack(side="right", fill="both", expand=True, padx=0, pady=0)
 
+    show_welcome_animation(right_frame)
+
     root.mainloop()
+
+# ------------------------------------------------------------------------------
+#                          CARREGAMENTO...
+# ------------------------------------------------------------------------------
 
 def show_welcome_animation(frame):
     """Exibe a animação de boas-vindas no frame fornecido."""
@@ -683,28 +461,11 @@ def show_welcome_animation(frame):
     for i in range(3):
         frame.after(500 * i, lambda i=i: label.configure(text=f"Carregando{'.' * (i + 1)}"))
 
+# ------------------------------------------------------------------------------
+#                          INTERFACE POSTS
+# ------------------------------------------------------------------------------
+
 def show_posts(frame):
-    """Exibe a interface para posts no frame fornecido."""
-    for widget in frame.winfo_children():
-        widget.destroy()
-
-    # ctk.CTkLabel(frame, text="Postagem Automática", font=("Arial", 20)).pack(pady=5)
-
-    # Adicione os elementos específicos da interface de posts aqui
-    main_frame = ctk.CTkFrame(frame, corner_radius=10)
-    main_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
-
-    # Caixa de pergunta no topo
-    post_label = ctk.CTkLabel(main_frame, text="O que você quer postar?", font=("Arial", 26))
-    post_label.pack(pady=10)
-
-    post_box = ctk.CTkTextbox(main_frame, height=400, width=1000, font=("Noto Color Emoji", 18))
-    post_box.pack(pady=10)
-
-    post_button = ctk.CTkButton(main_frame, text="Postar", corner_radius=5)
-    post_button.pack(pady=5)
-
-def show_videos(frame):
     """Exibe a interface para vídeos no frame fornecido."""
     for widget in frame.winfo_children():
         widget.destroy()
@@ -716,41 +477,19 @@ def show_videos(frame):
     left_frame.pack(side="left", fill="y")
 
     ctk.CTkLabel(left_frame, text="Selecione as Opções", font=("Arial", 16)).pack(pady=15, padx=20)
-    
-    '''
-    # Scrollbar
-    scrollbar = ctk.CTkScrollbar(left_frame, orientation="vertical", command=left_frame.winfo_y)
-    scrollbar.pack(side="right", fill="y")
-    '''
 
     right_frame = ctk.CTkFrame(frame, border_color='#cccccc', border_width=0)
     right_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
     social_networks = [
-        {"name": "YouTube", "filename": "youtube.png"},
-        {"name": "COS.TV", "filename": "cos_tv.png"},
-        {"name": "Odysee", "filename": "odysee.png"},
-        {"name": "Rumble", "filename": "rumble.png"},
-        {"name": "Tiktok", "filename": "tiktok.png"},
         {"name": "Facebook", "filename": "facebook.png"},
+        {"name": "X", "filename": "x.png"},
+        {"name": "Linkedin", "filename": "linkedin.png"},
+        {"name": "Reddit", "filename": "reddit.png"},
     ]
 
     icon_dir = "./icons"
     selected_networks = []
-
-    '''
-    def toggle_network(network):
-        """Alterna o estado de seleção de uma rede social."""
-        if network in selected_networks:
-            selected_networks.remove(network)
-        else:
-            selected_networks.append(network)
-
-    def display_interface(network_name):
-        """Exibe a interface no lado direito com base na rede selecionada."""
-        for widget in right_frame.winfo_children():
-            widget.destroy()
-    '''
     
     for index, network in enumerate(social_networks):
         icon_path = os.path.join(icon_dir, network["filename"])
@@ -778,9 +517,151 @@ def show_videos(frame):
             )
         button.pack(side="right", fill="x", expand=True, padx=5)
 
+    interface_posts(right_frame)
+
+def interface_posts(frame):
+    """Exibe a interface para posts no frame fornecido."""
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+    # Adicione os elementos específicos da interface de posts aqui
+    main_frame = ctk.CTkFrame(frame, corner_radius=10)
+    main_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+
+    # Caixa de pergunta no topo
+    post_label = ctk.CTkLabel(main_frame, text="O que você quer postar?", font=("Arial", 26))
+    post_label.pack(pady=10)
+
+    post_box = ctk.CTkTextbox(main_frame, height=400, width=900, font=("Noto Color Emoji", 18))
+    post_box.pack(pady=10)
+
+    URL = ctk.CTkButton(main_frame, text='URL', corner_radius=5).pack(pady=10, padx=10)
+
+    post_button = ctk.CTkButton(main_frame, text="Postar", corner_radius=5)
+    post_button.pack(pady=5)
+
+# ------------------------------------------------------------------------------
+#                    Funções Vinculadas aos Switches
+# ------------------------------------------------------------------------------
+def execute_uploads(selected_networks, video_entry, title_entry, description_entry, tags_entry, thumbnail_entry, upload_functions):
+    """Executa as funções de upload para as redes sociais selecionadas."""
+    if not selected_networks:
+        messagebox.showwarning("Aviso", "Nenhuma rede social foi selecionada!")
+        return
+
+    # Obter os valores diretamente dos campos de entrada
+    video_path = video_entry.get()
+    title = title_entry.get()
+    description = description_entry.get("1.0", "end-1c")
+    tags = tags_entry.get("1.0", "end-1c")
+    thumbnail_path = thumbnail_entry.get()
+
+    # Verificar se os campos obrigatórios estão preenchidos
+    if not video_path or not title or not description:
+        messagebox.showerror("Erro", "Por favor, preencha todos os campos obrigatórios!")
+        return
+
+    # Iterar sobre as redes sociais selecionadas
+    for network in selected_networks:
+        if network in upload_functions:
+            try:
+                print(f"Iniciando upload para {network}...")
+                upload_functions[network](video_path, title, description, tags, thumbnail_path)
+                print(f"Upload concluído para {network}.")
+            except Exception as e:
+                print(f"Erro ao fazer upload para {network}: {e}")
+        else:
+            print(f"Nenhuma função de upload configurada para {network}.")
+
+# ------------------------------------------------------------------------------
+#                          INTERFACE VIDEOS
+# ------------------------------------------------------------------------------
+
+def show_videos(frame):
+    """Exibe a interface para vídeos no frame fornecido."""
+    for widget in frame.winfo_children():
+        widget.destroy()
+    
+    # ----------[ Área de Seleção - Esquerda ]----------
+    left_frame = ctk.CTkFrame(frame, width=300)
+    left_frame.pack(side="left", fill="y")
+
+    ctk.CTkLabel(left_frame, text="Selecione as Opções", font=("Arial", 16)).pack(pady=15, padx=20)
+    
+    '''
+    # Scrollbar
+    scrollbar = ctk.CTkScrollbar(left_frame, orientation="vertical", command=left_frame.winfo_y)
+    scrollbar.pack(side="right", fill="y")
+    '''
+
+    right_frame = ctk.CTkFrame(frame, border_color='#cccccc', border_width=0)
+    right_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
+
+    social_networks = [
+        {"name": "YouTube", "filename": "youtube.png"},
+        {"name": "COS.TV", "filename": "cos_tv.png"},
+        {"name": "Odysee", "filename": "odysee.png"},
+        {"name": "Rumble", "filename": "rumble.png"},
+        {"name": "Tiktok", "filename": "tiktok.png"},
+        {"name": "Facebook", "filename": "facebook.png"},
+    ]
+
+    icon_dir = "./icons"
+    
+    # Mapeamento de redes sociais para funções
+    upload_functions = {
+        "YouTube": upload_youtube,
+        "COS.TV": upload_cos_tv
+        #"Odysee": upload_odysee,
+        #"Rumble": upload_rumble,
+        #"Tiktok": upload_tiktok,
+        #"Facebook": upload_facebook
+    }
+
+    # Lista para armazenar as redes selecionadas
+    selected_networks = []
+
+    def toggle_network(network_name):
+        """Alterna o estado de seleção de uma rede social."""
+        if network_name in selected_networks:
+            selected_networks.remove(network_name)
+        else:
+            selected_networks.append(network_name)
+        print(f"Redes sociais selecionadas: {selected_networks}")  # Apenas para debug
+    
+    for index, network in enumerate(social_networks):
+        icon_path = os.path.join(icon_dir, network["filename"])
+        if not os.path.exists(icon_path):
+            print(f"Ícone não encontrado: {icon_path}")
+            continue
+
+        icon_image = ctk.CTkImage(light_image=Image.open(icon_path), size=(50, 50))
+
+        # Frame para cada botão de rede social
+        item_frame = ctk.CTkFrame(left_frame, border_width=2)
+        item_frame.pack(fill="x", padx=10, pady=5)
+
+        # Ícone
+        icon_label = ctk.CTkLabel(item_frame, image=icon_image, text="")
+        icon_label.pack(side="left", padx=5, pady=5)
+
+        # Variavel do switch
+        switch_var = ctk.StringVar(value="youtube")
+        
+        # Botão
+        button = ctk.CTkSwitch(
+            item_frame, 
+            text=network["name"],
+            command=lambda n=network["name"]: toggle_network(n),
+            height=30,
+            corner_radius=20
+        )
+        button.pack(side="right", fill="x", expand=True, padx=5)
+
     interface_upload(right_frame)
 
 def interface_upload(right_frame):
+    global video_entry, title_entry, description_entry, tags_entry, thumbnail_entry
 
     # ----------[ Caminho do vídeo ]----------
     ctk.CTkLabel(right_frame, text="Caminho do Vídeo:").grid(row=1, column=0, padx=10, pady=5, sticky="w")
@@ -788,44 +669,33 @@ def interface_upload(right_frame):
     video_entry.grid(row=1, column=1, padx=10, pady=5)
     ctk.CTkButton(right_frame, text="Selecionar", command=lambda: select_file(video_entry)).grid(row=1, column=2, padx=10, pady=5)
 
-    # ----------[ Titulo do vídeo ]----------
+    # ----------[ Título do vídeo ]----------
     ctk.CTkLabel(right_frame, text="Título:").grid(row=2, column=0, padx=10, pady=5, sticky="w")
     title_entry = ctk.CTkEntry(right_frame, placeholder_text="Título do vídeo", width=400)
     title_entry.grid(row=2, column=1, padx=10, pady=5)
 
     # ----------[ Descrição do vídeo ]----------
     ctk.CTkLabel(right_frame, text="Descrição:").grid(row=3, column=0, padx=10, pady=5, sticky="w")
-    description_entry = ctk.CTkTextbox(right_frame, width=400)
+    description_entry = ctk.CTkTextbox(right_frame, width=400, height=100)
     description_entry.grid(row=3, column=1, padx=10, pady=5)
 
-    # ----------[ Miniatura do vídeo ]----------
-    ctk.CTkLabel(right_frame, text="Caminho da Miniatura:").grid(row=4, column=0, padx=10, pady=5, sticky="w")
-    thumbnail_entry = ctk.CTkEntry(right_frame, placeholder_text=".JPEG | .PNG | .GIF | .BMP", width=400)
-    thumbnail_entry.grid(row=4, column=1, padx=10, pady=5)
-    ctk.CTkButton(right_frame, text="Selecionar", command=lambda: select_file(thumbnail_entry)).grid(row=4, column=2, padx=10, pady=5)
-
     # ----------[ Tags do vídeo ]----------
-    ctk.CTkLabel(right_frame, text="Tags:").grid(row=5, column=0, padx=10, pady=5, sticky="w")
+    ctk.CTkLabel(right_frame, text="Tags:").grid(row=4, column=0, padx=10, pady=5, sticky="w")
     tags_entry = ctk.CTkTextbox(right_frame, width=400, height=50)
-    tags_entry.grid(row=5, column=1, padx=10, pady=5)
+    tags_entry.grid(row=4, column=1, padx=10, pady=5)
 
-    #       ----------[        ]----------
-    #       ----------[ BOTÕES ]----------
-    #       ----------[        ]----------
-    
-    # ----------[ Botão de Upload YouTube ]----------
-    ctk.CTkButton(right_frame, text="Upload YouTube", command=lambda: upload_youtube(
-        video_entry.get(), title_entry.get(), description_entry.get("1.0", "end-1c"),
-        tags_entry.get("1.0", "end-1c"),
-        thumbnail_entry.get()
-    )).grid(row=6, column=0, columnspan=2, pady=10)
+    # ----------[ Caminho da miniatura ]----------
+    ctk.CTkLabel(right_frame, text="Caminho da Miniatura:").grid(row=5, column=0, padx=10, pady=5, sticky="w")
+    thumbnail_entry = ctk.CTkEntry(right_frame, placeholder_text=".JPEG | .PNG | .GIF | .BMP", width=400)
+    thumbnail_entry.grid(row=5, column=1, padx=10, pady=5)
+    ctk.CTkButton(right_frame, text="Selecionar", command=lambda: select_file(thumbnail_entry)).grid(row=5, column=2, padx=10, pady=5)
 
-    # ----------[ Botão de Upload Cos.Tv ]----------
-    ctk.CTkButton(right_frame, text="Upload Cos.Tv", command=lambda: upload_cos_tv(
-        video_entry.get(), title_entry.get(), description_entry.get("1.0", "end-1c"),
-        tags_entry.get("1.0", "end-1c"),
-        thumbnail_entry.get()
-    )).grid(row=6, column=1, columnspan=2, pady=10)
+    # ----------[ Botão Geral ]----------
+    ctk.CTkButton(
+        right_frame,
+        text="Postar",
+        corner_radius=5,
+        command=execute_uploads
+    ).grid(row=6, column=0, columnspan=2, pady=10)
     
 create_menu()
-
