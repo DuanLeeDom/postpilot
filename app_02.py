@@ -432,6 +432,7 @@ def create_menu():
     icon_menu = ctk.CTkImage(light_image=Image.open('./icons/menu.png'), dark_image=Image.open('./icons/menu.png'), size=(40, 40))
     ctk.CTkButton(menu_frame, width=60, height=60, text='', image=icon_menu, fg_color="transparent", hover_color="gray", border_width=0).pack(side="top")
 
+    # menu bar | Opetions
     post_vision = ctk.CTkButton(menu_frame, width=40, height=40, text="Posts", border_width=0, command=lambda: show_posts(right_frame)).pack(anchor='center', pady=10)
     video_vision = ctk.CTkButton(menu_frame, width=40, height=40, text="Vídeos", border_width=0, command=lambda: show_videos(right_frame)).pack(anchor='center', pady=10)
 
@@ -543,7 +544,7 @@ def interface_posts(frame):
 # ------------------------------------------------------------------------------
 #                    Funções Vinculadas aos Switches
 # ------------------------------------------------------------------------------
-def execute_uploads(selected_networks, video_entry, title_entry, description_entry, tags_entry, thumbnail_entry, upload_functions):
+def execute_uploads(selected_networks, upload_functions):
     """Executa as funções de upload para as redes sociais selecionadas."""
     if not selected_networks:
         messagebox.showwarning("Aviso", "Nenhuma rede social foi selecionada!")
@@ -557,7 +558,7 @@ def execute_uploads(selected_networks, video_entry, title_entry, description_ent
     thumbnail_path = thumbnail_entry.get()
 
     # Verificar se os campos obrigatórios estão preenchidos
-    if not video_path or not title or not description:
+    if not video_path or not title or not description or not tags or not thumbnail_path:
         messagebox.showerror("Erro", "Por favor, preencha todos os campos obrigatórios!")
         return
 
@@ -587,12 +588,6 @@ def show_videos(frame):
     left_frame.pack(side="left", fill="y")
 
     ctk.CTkLabel(left_frame, text="Selecione as Opções", font=("Arial", 16)).pack(pady=15, padx=20)
-    
-    '''
-    # Scrollbar
-    scrollbar = ctk.CTkScrollbar(left_frame, orientation="vertical", command=left_frame.winfo_y)
-    scrollbar.pack(side="right", fill="y")
-    '''
 
     right_frame = ctk.CTkFrame(frame, border_color='#cccccc', border_width=0)
     right_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
@@ -611,11 +606,7 @@ def show_videos(frame):
     # Mapeamento de redes sociais para funções
     upload_functions = {
         "YouTube": upload_youtube,
-        "COS.TV": upload_cos_tv
-        #"Odysee": upload_odysee,
-        #"Rumble": upload_rumble,
-        #"Tiktok": upload_tiktok,
-        #"Facebook": upload_facebook
+        "COS.TV": upload_cos_tv,
     }
 
     # Lista para armazenar as redes selecionadas
@@ -629,7 +620,7 @@ def show_videos(frame):
             selected_networks.append(network_name)
         print(f"Redes sociais selecionadas: {selected_networks}")  # Apenas para debug
     
-    for index, network in enumerate(social_networks):
+    for network in social_networks:
         icon_path = os.path.join(icon_dir, network["filename"])
         if not os.path.exists(icon_path):
             print(f"Ícone não encontrado: {icon_path}")
@@ -645,22 +636,28 @@ def show_videos(frame):
         icon_label = ctk.CTkLabel(item_frame, image=icon_image, text="")
         icon_label.pack(side="left", padx=5, pady=5)
 
-        # Variavel do switch
-        switch_var = ctk.StringVar(value="youtube")
-        
-        # Botão
+        # SOMENTE AQUI ESTÁ O PROBLEMA DE NÃO APARECER O SWITCH ATIVADO POR PADRÃO DO YOUTUBE E MANDAR UMA MENSAGEM CASO NÃO ESTEJA SELECIONADO UMA DAS OPÇÕES
+
+        # Switch
+        initial_value = "off" if network["name"] == "YouTube" else "off"
+
+        if network["name"] == "YouTube":
+            selected_networks.append(network["name"])  # Adicionar YouTube por padrão
+
         button = ctk.CTkSwitch(
             item_frame, 
             text=network["name"],
             command=lambda n=network["name"]: toggle_network(n),
             height=30,
-            corner_radius=20
+            corner_radius=20,
+            variable=ctk.StringVar(value=initial_value),
         )
         button.pack(side="right", fill="x", expand=True, padx=5)
+    
+    interface_upload(right_frame, selected_networks, upload_functions)
 
-    interface_upload(right_frame)
 
-def interface_upload(right_frame):
+def interface_upload(right_frame, selected_networks, upload_functions):
     global video_entry, title_entry, description_entry, tags_entry, thumbnail_entry
 
     # ----------[ Caminho do vídeo ]----------
@@ -695,7 +692,7 @@ def interface_upload(right_frame):
         right_frame,
         text="Postar",
         corner_radius=5,
-        command=execute_uploads
+        command=lambda: execute_uploads(selected_networks, upload_functions)
     ).grid(row=6, column=0, columnspan=2, pady=10)
     
 create_menu()
