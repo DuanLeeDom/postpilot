@@ -268,20 +268,38 @@ def upload_cos_tv(video_path, title, description, tags, thumbnail_path):
 
         # Carrega o arquivo de vídeo
         time.sleep(5)
-        video_input = driver.find_element(By.NAME, 'File')
-        video_input.send_keys(video_path)
+        video_input = driver.find_elements(By.XPATH, '//input[@type="file"]')
+        video_input[0].send_keys(video_path)
 
         # Preenche título e descrição
         time.sleep(2)
         text_input = driver.find_elements(By.XPATH, '/html/body/div/div/div/div/div[1]/main/div/div[1]/div/form/div/div/div[2]/div/div[1]/div/div[1]/div/input')
+        text_input[0].send_keys(Keys.CONTROL + "a")  # Seleciona todo o texto
+        text_input[0].send_keys(Keys.BACKSPACE)      # Remove o texto atual
         text_input[0].send_keys(title)
 
         description_inputs = driver.find_elements(By.XPATH, '/html/body/div/div/div/div/div[1]/main/div/div[1]/div/form/div/div/div[2]/div/div[2]/div/div[1]/div[1]/textarea')
         description_inputs[0].send_keys(description)
 
+        # Obtém o texto das tags corretamente
+        tags_text = tags_entry.get("1.0", "end-1c")  # Pega o texto da caixa de entrada
+        tags_list = tags_text.split(",")  # Divide em uma lista separada por vírgulas
+        first_three_tags = [tag.strip() for tag in tags_list[:3]]  # Remove espaços extras e pega as 3 primeiras
+
         time.sleep(2)
-        tags_input = driver.find_elements(By.XPATH, '/html/body/div/div/div/div/div[1]/main/div/div[1]/div/form/div/div/div[2]/div/div[5]/div/div[1]/div[1]')
-        tags_input[0].send_keys(tags)
+
+        # Localiza o campo de input das tags
+        tags_input = driver.find_element(By.XPATH, '/html/body/div/div/div/div[1]/div[1]/main/div/div[1]/div/form/div/div[1]/div[2]/div/div[5]/div/div[1]/div[1]/div[1]')
+        tags_input.click()
+
+        time.sleep(2)
+
+        # Envia cada tag separadamente e pressiona TAB depois
+        for tag in first_three_tags:
+            time.sleep(1)
+            tags_input.send_keys(tag)  # Envia UMA tag por vez
+            time.sleep(1)
+            tags_input.send_keys(Keys.TAB)  # Pressiona TAB para confirmar e avançar para a próxima
 
         time.sleep(2)
         click_01 = driver.find_element(By.XPATH, '/html/body/div/div/div/div/div[1]/main/div/div[1]/div/form/div/div/div[3]/div[3]/div/div/div[1]/div/div[1]/div/div/div/div[1]/div/div')
@@ -331,6 +349,58 @@ def select_file(entry):
     entry.delete(0, ctk.END)
     entry.insert(0, filepath)
 
+# ========================================================================
+#                     POST YOUTUBE | SELENIUM
+# ========================================================================
+
+def post_youtube(post_box):
+    try:
+        chrome_options = Options()
+        main_directory = os.path.join(sys.path[0])
+
+        # Configura o perfil do Chrome
+        chrome_options.add_argument("--user-data-dir=" + main_directory + "/chrome_profile")
+
+        # Abre uma porta de depuração remota para evitar detecção de automação
+        chrome_options.add_argument("--remote-debugging-port=9223")
+        chrome_options.add_experimental_option("detach", True)
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+        # Cria o serviço para o ChromeDriver
+        service = Service(ChromeDriverManager().install())
+
+        # Inicializa o driver do Chrome
+        global driver
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+
+        # Navega até o YouTube
+        wait = WebDriverWait(driver, 60)
+        driver.maximize_window()
+        driver.get('https://www.youtube.com/')
+
+        time.sleep(1)
+        next_01 = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/div[2]/ytd-masthead/div[4]/div[3]/div[2]/ytd-topbar-menu-button-renderer/button/yt-img-shadow/img')
+        next_01.click()
+
+        time.sleep(1)
+        next_02 = driver.find_element(By.XPATH, '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[2]/ytd-active-account-header-renderer/div/yt-formatted-string[4]/a')
+        next_02.click()
+
+        time.sleep(1)
+        next_02 = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse[2]/div[3]/ytd-tabbed-page-header/tp-yt-app-header-layout/div/tp-yt-app-header/div[2]/tp-yt-app-toolbar/div/div/tp-yt-paper-tabs/div/div/yt-tab-group-shape/div[1]/yt-tab-shape[5]/div[1]')
+        next_02.click()
+
+        time.sleep(1)
+        post = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse[2]/ytd-two-column-browse-results-renderer/div[1]/ytd-section-list-renderer/div[2]/ytd-backstage-items/ytd-item-section-renderer/div[1]/ytd-comments-header-renderer/div[7]/ytd-backstage-post-dialog-renderer/div[2]/div[2]/div/div[1]/yt-formatted-string')
+        post.click()
+        post.send_keys(post_box)
+
+        messagebox.showinfo("Sucesso", "Upload concluído com sucesso!")
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
+
+
 # ------------------------------------------------------------------------------  
 #            Função para abrir a janela de configurações de usuario
 # ------------------------------------------------------------------------------
@@ -338,9 +408,11 @@ def select_file(entry):
 def open_settings_window():
     """Cria e exibe uma janela de configurações."""
     # Janela de configurações
+    ctk.set_appearance_mode("System")
+    ctk.set_default_color_theme("blue")
+    
     settings_window = ctk.CTkToplevel()
     settings_window.title("Configurações")
-    settings_window.geometry("400x300")
 
     # ----------[ Obtendo as dimensões da tela | Centralizar ]----------
     screen_width = settings_window.winfo_screenwidth()
@@ -353,9 +425,13 @@ def open_settings_window():
     position_left = int(screen_width / 2 - window_width / 2)
 
     settings_window.geometry(f"{window_width}x{window_height}+{position_left}+{position_top}")
-
     settings_window.resizable(False, False)
-    settings_window.grab_set()
+    
+    # Container principal com cor de fundo explícita
+    container = ctk.CTkFrame(settings_window, fg_color=("gray90", "gray13"))
+    container.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+    settings_window.grid_rowconfigure(0, weight=1)
+    settings_window.grid_columnconfigure(0, weight=1)
 
     # Função para salvar as configurações
     def save_settings():
@@ -364,38 +440,63 @@ def open_settings_window():
         ctk.CTkMessagebox.show_info("Configurações", f"Configurações salvas!\n\nTema: {theme}\nNotificações: {'Ativadas' if notifications else 'Desativadas'}")
         settings_window.destroy()
 
-    # Tema
-    ctk.CTkLabel(settings_window, text="Tema:", font=("Arial", 14)).pack(anchor="w", padx=10, pady=10)
-    theme_var = ctk.StringVar(value="Sistema")
-    ctk.CTkRadioButton(settings_window, text="Sistema", variable=theme_var, value="Sistema").pack(anchor="w", padx=20, pady=5)
-    ctk.CTkRadioButton(settings_window, text="Claro", variable=theme_var, value="Claro").pack(anchor="w", padx=20, pady=5)
-    ctk.CTkRadioButton(settings_window, text="Escuro", variable=theme_var, value="Escuro").pack(anchor="w", padx=20, pady=5)
+    current_row = 0
 
-    # Trocar Cores
-    ctk.CTkLabel(settings_window, text="Trocar Cores:", font=("Arial", 14)).pack(anchor="w", padx=10, pady=10)
+    # Tema
+    ctk.CTkLabel(container, text="Tema:", font=("Arial", 14)).grid(row=current_row, column=0, sticky="w", padx=10, pady=5)
+    current_row += 1
+    
+    theme_var = ctk.StringVar(value="Sistema")
+    for theme in ["Sistema", "Claro", "Escuro"]:
+        ctk.CTkRadioButton(container, text=theme, variable=theme_var, value=theme).grid(
+            row=current_row, column=0, sticky="w", padx=30, pady=2)
+        current_row += 1
+
+    # Cores
+    ctk.CTkLabel(container, text="Trocar Cores:", font=("Arial", 14)).grid(row=current_row, column=0, sticky="w", padx=10, pady=5)
+    current_row += 1
+    
     color_var = ctk.StringVar(value="Azul")
-    ctk.CTkRadioButton(settings_window, text="Azul", variable=color_var, value="Azul").pack(anchor="w", padx=20, pady=5)
-    ctk.CTkRadioButton(settings_window, text="Verde", variable=color_var, value="Verde").pack(anchor="w", padx=20, pady=5)
+    for color in ["Azul", "Verde"]:
+        ctk.CTkRadioButton(container, text=color, variable=color_var, value=color).grid(
+            row=current_row, column=0, sticky="w", padx=30, pady=2)
+        current_row += 1
 
     # Notificações
-    ctk.CTkLabel(settings_window, text="Notificações:", font=("Arial", 14)).pack(anchor="w", padx=10, pady=10)
+    ctk.CTkLabel(container, text="Notificações:", font=("Arial", 14)).grid(row=current_row, column=0, sticky="w", padx=10, pady=5)
+    current_row += 1
+    
     notif_var = ctk.BooleanVar(value=True)
-    ctk.CTkCheckBox(settings_window, text="Ativar notificações", variable=notif_var).pack(anchor="w", padx=20, pady=5)
+    ctk.CTkCheckBox(container, text="Ativar notificações", variable=notif_var).grid(
+        row=current_row, column=0, sticky="w", padx=30, pady=5)
+    current_row += 1
 
-    # ----------[ Botão de abrir o Google Chrome ]----------
-    ctk.CTkButton(settings_window, text="Abrir Google Chrome", command=lambda: open_google()).pack(anchor="w", padx=20, pady=5)
+    # Botões de ação
+    button_frame = ctk.CTkFrame(container, fg_color="transparent")
+    button_frame.grid(row=current_row, column=0, sticky="ew", pady=10)
+    current_row += 1
 
-    # ----------[ Botão de fechar navegador ]----------
-    ctk.CTkButton(settings_window, text="Fechar Navegador", command=lambda: close_browser_tab(driver)).pack(anchor="w", padx=20, pady=5)
+    ctk.CTkButton(button_frame, text="Abrir Google Chrome", 
+                 command=lambda: open_google()).pack(pady=5)
+    
+    ctk.CTkButton(button_frame, text="Fechar Navegador",
+                 command=lambda: close_browser_tab(driver)).pack(pady=5)
+    
+    ctk.CTkButton(button_frame, text="Configuração",
+                 command=lambda: configuration()).pack(pady=5)
 
-    # ----------[ Botão de Configuração ]----------
-    ctk.CTkButton(settings_window, text="Configuração", command=lambda: configuration()).pack(anchor="w", padx=20, pady=5)
+    # Botões de controle
+    control_frame = ctk.CTkFrame(container, fg_color="transparent")
+    control_frame.grid(row=current_row, column=0, sticky="ew", pady=10)
+    
+    ctk.CTkButton(control_frame, text="Salvar",
+                 command=save_settings).pack(side="left", padx=10)
+    ctk.CTkButton(control_frame, text="Fechar",
+                 command=settings_window.destroy).pack(side="right", padx=10)
 
-    # Botão de salvar
-    ctk.CTkButton(settings_window, text="Salvar", command=save_settings).pack(pady=20)
-
-    # Botão de fechar
-    ctk.CTkButton(settings_window, text="Fechar", command=settings_window.destroy).pack(pady=10)
+    # Garante que a janela seja modal e tenha foco
+    settings_window.grab_set()
+    settings_window.focus_force()
 
 # ------------------------------------------------------------------------------
 #                          INTERFACE NORMAL
@@ -442,7 +543,7 @@ def create_menu():
     right_frame = ctk.CTkFrame(frame, border_color='#cccccc', border_width=0)
     right_frame.pack(side="right", fill="both", expand=True, padx=0, pady=0)
 
-    show_welcome_animation(right_frame)
+    # show_welcome_animation(right_frame)
 
     root.mainloop()
 
@@ -467,11 +568,9 @@ def show_welcome_animation(frame):
 # ------------------------------------------------------------------------------
 
 def show_posts(frame):
-    """Exibe a interface para vídeos no frame fornecido."""
+    """Exibe a interface para posts no frame fornecido."""
     for widget in frame.winfo_children():
         widget.destroy()
-
-    # ctk.CTkLabel(frame, text="Postagem Automática de Vídeos", font=("Arial", 20)).pack(pady=5)
     
     # ----------[ Área de Seleção - Esquerda ]----------
     left_frame = ctk.CTkFrame(frame, width=300)
@@ -483,14 +582,31 @@ def show_posts(frame):
     right_frame.pack(side="right", fill="both", expand=True, padx=5, pady=5)
 
     social_networks = [
+        {"name": "YouTube", "filename": "youtube.png"},
         {"name": "Facebook", "filename": "facebook.png"},
-        {"name": "X", "filename": "x.png"},
         {"name": "Linkedin", "filename": "linkedin.png"},
-        {"name": "Reddit", "filename": "reddit.png"},
+        {"name": "X / Twitter", "filename": "x.png"},
+        {"name": "Reddit", "filename": "reddit.png"}
     ]
 
     icon_dir = "./icons"
+    
+    # Mapeamento de redes sociais para funções
+    upload_functions = {
+        "YouTube": post_youtube,
+        # Adicione outras funções de post aqui
+    }
+
+    # Lista para armazenar as redes selecionadas
     selected_networks = []
+
+    def toggle_network(network_name):
+        """Alterna o estado de seleção de uma rede social."""
+        if network_name in selected_networks:
+            selected_networks.remove(network_name)
+        else:
+            selected_networks.append(network_name)
+        print(f"Redes sociais selecionadas: {selected_networks}")
     
     for index, network in enumerate(social_networks):
         icon_path = os.path.join(icon_dir, network["filename"])
@@ -500,34 +616,37 @@ def show_posts(frame):
 
         icon_image = ctk.CTkImage(light_image=Image.open(icon_path), size=(50, 50))
 
-        # Frame para cada botão de rede social
         item_frame = ctk.CTkFrame(left_frame, border_width=2)
         item_frame.pack(fill="x", padx=10, pady=5)
 
-        # Ícone
         icon_label = ctk.CTkLabel(item_frame, image=icon_image, text="")
         icon_label.pack(side="left", padx=5, pady=5)
 
-        # Botão
+        # Criar o switch
         button = ctk.CTkSwitch(
             item_frame, 
             text=network["name"],
-            #command=lambda n=network["name"]: display_interface(n),
+            command=lambda n=network["name"]: toggle_network(n),
             height=30,
             corner_radius=20
-            )
+        )
         button.pack(side="right", fill="x", expand=True, padx=5)
+
+        # Ativar o YouTube por padrão e adicionar à lista de selecionados
+        if network["name"] == "YouTube":
+            button.select()
+            selected_networks.append(network["name"])
 
     interface_posts(right_frame)
 
-def interface_posts(frame):
+def interface_posts(frame, selected_networks, upload_functions):
     """Exibe a interface para posts no frame fornecido."""
     for widget in frame.winfo_children():
         widget.destroy()
 
     # Adicione os elementos específicos da interface de posts aqui
     main_frame = ctk.CTkFrame(frame, corner_radius=10)
-    main_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+    main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
     # Caixa de pergunta no topo
     post_label = ctk.CTkLabel(main_frame, text="O que você quer postar?", font=("Arial", 26))
@@ -536,9 +655,15 @@ def interface_posts(frame):
     post_box = ctk.CTkTextbox(main_frame, height=400, width=900, font=("Noto Color Emoji", 18))
     post_box.pack(pady=10)
 
-    URL = ctk.CTkButton(main_frame, text='URL', corner_radius=5).pack(pady=10, padx=10)
+    URL = ctk.CTkButton(main_frame, text='URL', corner_radius=5)
+    URL.pack(pady=10, padx=10)
 
-    post_button = ctk.CTkButton(main_frame, text="Postar", corner_radius=5)
+    post_button = ctk.CTkButton(
+        main_frame, 
+        text="Postar", 
+        corner_radius=5,
+        command=lambda: execute_uploads(selected_networks, upload_functions)
+    )
     post_button.pack(pady=5)
 
 # ------------------------------------------------------------------------------
@@ -618,9 +743,9 @@ def show_videos(frame):
             selected_networks.remove(network_name)
         else:
             selected_networks.append(network_name)
-        print(f"Redes sociais selecionadas: {selected_networks}")  # Apenas para debug
+        print(f"Redes sociais selecionadas: {selected_networks}")
     
-    for network in social_networks:
+    for index, network in enumerate(social_networks):
         icon_path = os.path.join(icon_dir, network["filename"])
         if not os.path.exists(icon_path):
             print(f"Ícone não encontrado: {icon_path}")
@@ -628,34 +753,28 @@ def show_videos(frame):
 
         icon_image = ctk.CTkImage(light_image=Image.open(icon_path), size=(50, 50))
 
-        # Frame para cada botão de rede social
         item_frame = ctk.CTkFrame(left_frame, border_width=2)
         item_frame.pack(fill="x", padx=10, pady=5)
 
-        # Ícone
         icon_label = ctk.CTkLabel(item_frame, image=icon_image, text="")
         icon_label.pack(side="left", padx=5, pady=5)
 
-        # SOMENTE AQUI ESTÁ O PROBLEMA DE NÃO APARECER O SWITCH ATIVADO POR PADRÃO DO YOUTUBE E MANDAR UMA MENSAGEM CASO NÃO ESTEJA SELECIONADO UMA DAS OPÇÕES
-
-        # Switch
-        initial_value = "off" if network["name"] == "YouTube" else "off"
-
-        if network["name"] == "YouTube":
-            selected_networks.append(network["name"])  # Adicionar YouTube por padrão
-
+        # Criar o switch
         button = ctk.CTkSwitch(
             item_frame, 
             text=network["name"],
             command=lambda n=network["name"]: toggle_network(n),
             height=30,
-            corner_radius=20,
-            variable=ctk.StringVar(value=initial_value),
+            corner_radius=20
         )
         button.pack(side="right", fill="x", expand=True, padx=5)
-    
-    interface_upload(right_frame, selected_networks, upload_functions)
 
+        # Ativar o YouTube por padrão e adicionar à lista de selecionados
+        if network["name"] == "YouTube":
+            button.select()
+            selected_networks.append(network["name"])
+
+    interface_upload(right_frame, selected_networks, upload_functions)
 
 def interface_upload(right_frame, selected_networks, upload_functions):
     global video_entry, title_entry, description_entry, tags_entry, thumbnail_entry
