@@ -571,7 +571,7 @@ def show_posts(frame):
     """Exibe a interface para posts no frame fornecido."""
     for widget in frame.winfo_children():
         widget.destroy()
-    
+
     # ----------[ Área de Seleção - Esquerda ]----------
     left_frame = ctk.CTkFrame(frame, width=300)
     left_frame.pack(side="left", fill="y")
