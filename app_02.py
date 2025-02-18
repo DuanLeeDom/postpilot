@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import psutil
 import customtkinter as ctk
 from tkcalendar import Calendar
 from tkinter import filedialog, messagebox
@@ -10,9 +11,37 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from datetime import date
 from selenium.webdriver.common.keys import Keys
+
+# ========================================================================
+#                  VERIFICAÇÃO DO GOOGLE CHROME
+# ========================================================================
+
+def is_chrome_open():
+    """Verifica se o Google Chrome já está aberto."""
+    for process in psutil.process_iter(attrs=['pid', 'name']):
+        if "chrome" in process.info['name'].lower():
+            return True
+    return False
+
+def get_driver():
+    """Retorna uma instância do WebDriver, reutilizando o Chrome se já estiver aberto."""
+    chrome_options = Options()
+    main_directory = os.path.join(sys.path[0])
+
+    # Configuração do perfil do Chrome
+    chrome_options.add_argument("--user-data-dir=" + main_directory + "/chrome_profile")
+    chrome_options.add_argument("--remote-debugging-port=9223")
+    chrome_options.add_experimental_option("detach", True)
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+    # Inicializa o driver
+    service = Service(ChromeDriverManager().install())
+    return webdriver.Chrome(service=service, options=chrome_options)
 
 # ========================================================================
 #                  OPEN GOOGLE CHROME | SELENIUM
@@ -111,24 +140,15 @@ def upload_youtube(video_path, title, description, tags, thumbnail_path):
     - thumbnail_path (str): Caminho para a miniatura do vídeo.
     """
     try:
-        # Configuração inicial do navegador
-        chrome_options = Options()
-        main_directory = os.path.join(sys.path[0])
-
-        # Configura o perfil do navegador para evitar logins repetidos
-        chrome_options.add_argument("--user-data-dir=" + main_directory + "/chrome_profile")
-        # Ativa a porta de depuração para evitar detecção de automação
-        chrome_options.add_argument("--remote-debugging-port=9223")
-        # Desativa extensões e mensagens de automação
-        chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_experimental_option("useAutomationExtension", False)
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-
-        # Cria o serviço para o driver do Chrome
-        service = Service(ChromeDriverManager().install())
-        # Inicializa o navegador com as opções configuradas
         global driver
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
+
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
 
         # Abre o YouTube Studio
         wait = WebDriverWait(driver, 60)
@@ -237,24 +257,15 @@ def upload_youtube(video_path, title, description, tags, thumbnail_path):
 
 def upload_cos_tv(video_path, title, description, tags, thumbnail_path):
     try:
-        chrome_options = Options()
-        main_directory = os.path.join(sys.path[0])
-
-        # Configura o perfil do Chrome
-        chrome_options.add_argument("--user-data-dir=" + main_directory + "/chrome_profile")
-
-        # Abre uma porta de depuração remota para evitar detecção de automação
-        chrome_options.add_argument("--remote-debugging-port=9223")
-        chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_experimental_option("useAutomationExtension", False)
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-
-        # Cria o serviço para o ChromeDriver
-        service = Service(ChromeDriverManager().install())
-
-        # Inicializa o driver do Chrome
         global driver
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
+
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
 
         # Navega até o YouTube
         wait = WebDriverWait(driver, 60)
@@ -355,51 +366,217 @@ def select_file(entry):
 
 def post_youtube(post_box):
     try:
-        chrome_options = Options()
-        main_directory = os.path.join(sys.path[0])
-
-        # Configura o perfil do Chrome
-        chrome_options.add_argument("--user-data-dir=" + main_directory + "/chrome_profile")
-
-        # Abre uma porta de depuração remota para evitar detecção de automação
-        chrome_options.add_argument("--remote-debugging-port=9223")
-        chrome_options.add_experimental_option("detach", True)
-        chrome_options.add_experimental_option("useAutomationExtension", False)
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-
-        # Cria o serviço para o ChromeDriver
-        service = Service(ChromeDriverManager().install())
-
-        # Inicializa o driver do Chrome
         global driver
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
 
-        # Navega até o YouTube
-        wait = WebDriverWait(driver, 60)
-        driver.maximize_window()
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+
+        # Abre uma nova aba para postar no YouTube
+        driver.execute_script("window.open('');")
+        driver.switch_to.window(driver.window_handles[-1])
         driver.get('https://www.youtube.com/')
 
-        time.sleep(1)
-        next_01 = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/div[2]/ytd-masthead/div[4]/div[3]/div[2]/ytd-topbar-menu-button-renderer/button/yt-img-shadow/img')
-        next_01.click()
+        time.sleep(2)  # Aguarde o carregamento da página
 
-        time.sleep(1)
-        next_02 = driver.find_element(By.XPATH, '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[2]/ytd-active-account-header-renderer/div/yt-formatted-string[4]/a')
-        next_02.click()
+        # Clica no ícone do perfil para abrir o menu
+        profile_icon = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@id="avatar-btn"]')))
+        profile_icon.click()
 
-        time.sleep(1)
-        next_02 = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse[2]/div[3]/ytd-tabbed-page-header/tp-yt-app-header-layout/div/tp-yt-app-header/div[2]/tp-yt-app-toolbar/div/div/tp-yt-paper-tabs/div/div/yt-tab-group-shape/div[1]/yt-tab-shape[5]/div[1]')
-        next_02.click()
+        time.sleep(3)
 
-        time.sleep(1)
-        post = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse[2]/ytd-two-column-browse-results-renderer/div[1]/ytd-section-list-renderer/div[2]/ytd-backstage-items/ytd-item-section-renderer/div[1]/ytd-comments-header-renderer/div[7]/ytd-backstage-post-dialog-renderer/div[2]/div[2]/div/div[1]/yt-formatted-string')
+        # Obtém o nome do canal (ex: @DuanLeeDom)
+        channel_name_element = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown/div/ytd-multi-page-menu-renderer/div[2]/ytd-active-account-header-renderer/div/yt-formatted-string[3]')))
+        channel_name = channel_name_element.text.strip()  # Remove espaços extras   
+
+        if not channel_name.startswith("@"):
+            messagebox.showerror("Erro", "Não foi possível obter o nome do canal corretamente.")
+            return
+
+        time.sleep(3)
+        # Formata a URL correta da aba "Comunidade"
+        community_url = f"https://www.youtube.com/{channel_name}/community"
+        driver.get(community_url)
+
+        time.sleep(3)  # Aguarde o carregamento
+
+        # Clica na caixa de postagem
+        post_box_element = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-two-column-browse-results-renderer/div[1]/ytd-section-list-renderer/div[2]/ytd-backstage-items/ytd-item-section-renderer/div[1]/ytd-comments-header-renderer/div[7]/ytd-backstage-post-dialog-renderer/div[2]/div[2]/div/div[1]/yt-formatted-string')))
+        post_box_element.click()
+
+        time.sleep(3)
+        # Seleciona o campo de entrada e insere o texto
+        text_area = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-two-column-browse-results-renderer/div[1]/ytd-section-list-renderer/div[2]/ytd-backstage-items/ytd-item-section-renderer/div[1]/ytd-comments-header-renderer/div[7]/ytd-backstage-post-dialog-renderer/div[2]/ytd-commentbox/div[2]/div/div[2]/tp-yt-paper-input-container/div[2]/div/div[1]/ytd-emoji-input/yt-user-mention-autosuggest-input/yt-formatted-string/div')))
+        text_area.send_keys(post_box)
+
+        time.sleep(3)
+        post = driver.find_element(By.XPATH, '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-two-column-browse-results-renderer/div[1]/ytd-section-list-renderer/div[2]/ytd-backstage-items/ytd-item-section-renderer/div[1]/ytd-comments-header-renderer/div[7]/ytd-backstage-post-dialog-renderer/div[2]/ytd-commentbox/div[2]/div/div[5]/div[5]/ytd-button-renderer[2]/yt-button-shape/button')
         post.click()
-        post.send_keys(post_box)
 
-        messagebox.showinfo("Sucesso", "Upload concluído com sucesso!")
+        time.sleep(4)
     except Exception as e:
         messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
 
+# ========================================================================
+#                     POST FACEBOOK | SELENIUM
+# ========================================================================
+
+def post_facebook(post_box):
+    try:
+        global driver
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
+
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+
+        wait = WebDriverWait(driver, 30)
+        driver.maximize_window()
+        driver.get('https://www.facebook.com/')
+
+        time.sleep(5)  # Aguarde o carregamento da página
+        # clicar para postar
+        post_box_element = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div[2]/div/div/div/div[2]/div/div[2]/div/div/div/div[1]/div/div[1]/span')
+        post_box_element.click()
+
+        time.sleep(3)
+        post_box_next = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/form/div/div[1]/div/div/div/div[2]/div[1]/div[1]/div[1]/div/div/div[1]/p')
+        post_box_next.click()
+        post_box_next.send_keys(post_box)
+
+        time.sleep(3)
+        post_box_publish = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/form/div/div[1]/div/div/div/div[3]/div[2]/div/div/div')
+        post_box_publish.click()
+
+        time.sleep(4)    
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
+
+# ========================================================================
+#                     POST LINKENDIN | SELENIUM
+# ========================================================================
+
+def post_linkedin(post_box):
+    try:
+        global driver
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
+
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+
+        wait = WebDriverWait(driver, 30)
+        driver.maximize_window()
+        driver.get('https://www.linkedin.com/feed/')
+
+        time.sleep(5)  # Aguarde o carregamento da página
+        # clicar para postar
+        post_box_element = driver.find_element(By.XPATH, '/html/body/div[5]/div[3]/div/div/div[2]/div/div/main/div[1]/div[2]/div[2]/button/span/span')
+        post_box_element.click()
+
+        time.sleep(3)
+        post_box_next = driver.find_element(By.XPATH, '/html/body/div[4]/div/div/div/div[2]/div/div[2]/div[1]/div/div/div/div/div/div/div[1]/p')
+        post_box_next.click()
+        post_box_next.send_keys(post_box)
+
+        time.sleep(3)
+        post_box_publish = driver.find_element(By.XPATH, '/html/body/div[4]/div/div/div/div[2]/div/div[2]/div[2]/div[2]/div/div[2]/button')
+        post_box_publish.click()
+
+        time.sleep(4)    
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
+
+# ========================================================================
+#                     POST X / Twitter | SELENIUM
+# ========================================================================
+
+def post_x_twitter(post_box):
+    try:
+        global driver
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
+
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+
+        wait = WebDriverWait(driver, 30)
+        driver.maximize_window()
+        driver.get('https://x.com/')
+
+        time.sleep(5)  # Aguarde o carregamento da página
+        # clicar para postar
+        post_box_element = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div/div/div/div/div/div[1]/div/div/div/div/div/div[2]/div/div/div/div')
+        post_box_element.click()
+
+        time.sleep(3)
+        post_box_next = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div/div/div/div/div/div[1]/div/div/div/div/div/div[2]/div/div/div/div')
+        post_box_next.click()
+        post_box_next.send_keys(post_box)
+
+        time.sleep(3)
+        post_box_publish = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div[2]/div/div/div/button')
+        post_box_publish.click()
+
+        time.sleep(4)    
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
+
+# ========================================================================
+#                     POST REDDIT | SELENIUM
+# ========================================================================
+
+def post_reddit(post_box):
+    try:
+        global driver
+        driver = get_driver()
+        wait = WebDriverWait(driver, 30)
+
+        # Verifica se já há abas abertas e, se sim, fecha a última
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+
+        wait = WebDriverWait(driver, 30)
+        driver.maximize_window()
+        driver.get('https://reddit.com/')
+
+        time.sleep(5)  # Aguarde o carregamento da página
+        # clicar para postar
+        post_box_element = driver.find_element(By.XPATH, '/html/body/shreddit-app/reddit-header-large/reddit-header-action-items/header/nav/div[3]/div[1]/span[3]/create-post-entry-point-wrapper/faceplate-tracker/faceplate-tooltip/a')
+        post_box_element.click()
+
+        time.sleep(3)
+        title_box = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[1]/fieldset/div[1]/faceplate-tracker/faceplate-textarea-input')
+        title_box.click()
+        title_box.send_keys(title_label_main)
+
+        time.sleep(3)
+        post_box = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[2]/fieldset/faceplate-tracker/shreddit-composer/div')
+        post_box.click()
+        post_box.send_keys(post_box)
+
+        time.sleep(3)
+        post_click = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[6]/div/div/r-post-form-submit-button[1]')
+        post_click.click()
+
+        time.sleep(4)    
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
 
 # ------------------------------------------------------------------------------  
 #            Função para abrir a janela de configurações de usuario
@@ -594,6 +771,10 @@ def show_posts(frame):
     # Mapeamento de redes sociais para funções
     upload_functions = {
         "YouTube": post_youtube,
+        "Facebook": post_facebook,
+        "Linkedin": post_linkedin,
+        "X / Twitter" : post_x_twitter,
+        "Reddit" : post_reddit,
         # Adicione outras funções de post aqui
     }
 
@@ -637,39 +818,112 @@ def show_posts(frame):
             button.select()
             selected_networks.append(network["name"])
 
-    interface_posts(right_frame)
+    interface_posts(right_frame, selected_networks, upload_functions)
 
 def interface_posts(frame, selected_networks, upload_functions):
+    global post_box, URL_box, title_entries, title_label_main
+
     """Exibe a interface para posts no frame fornecido."""
     for widget in frame.winfo_children():
         widget.destroy()
 
-    # Adicione os elementos específicos da interface de posts aqui
     main_frame = ctk.CTkFrame(frame, corner_radius=10)
     main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # Caixa de pergunta no topo
-    post_label = ctk.CTkLabel(main_frame, text="O que você quer postar?", font=("Arial", 26))
-    post_label.pack(pady=10)
+    # Label principal do título (inicialmente invisível)
+    title_label_main = ctk.CTkLabel(main_frame, text="", font=("Arial", 20))
+    title_label_main.pack(pady=10)
 
+    # Caixa de texto
     post_box = ctk.CTkTextbox(main_frame, height=400, width=900, font=("Noto Color Emoji", 18))
     post_box.pack(pady=10)
 
-    URL = ctk.CTkButton(main_frame, text='URL', corner_radius=5)
-    URL.pack(pady=10, padx=10)
+    # Dicionário para armazenar os campos de título extras
+    title_entries = {}
 
+    def update_dynamic_fields():
+        """Adiciona ou remove os campos extras dinamicamente, sempre acima do Textbox."""
+        active_titles = []  # Lista para armazenar títulos ativos
+
+        for network in upload_functions.keys():
+            if network == "Reddit" and network in selected_networks and network not in title_entries:
+                # Adiciona o campo SE a rede estiver ativada
+                title_entry = ctk.CTkEntry(main_frame, placeholder_text=f"Título para {network}", width=600)
+                title_entry.pack(pady=5, before=post_box)  # Coloca antes do Textbox
+
+                # Salva no dicionário
+                title_entries[network] = title_entry
+                active_titles.append(f"Título para {network}")
+
+            elif network in title_entries and (network != "Reddit" or network not in selected_networks):
+                # Remove o campo SE a rede for desativada
+                title_entries[network].destroy()
+                del title_entries[network]
+
+        # Atualiza o título principal com base nas redes ativas
+        title_label_main.configure(text=" | ".join(active_titles) if active_titles else "")
+
+        # Reexecuta a verificação a cada 500ms
+        frame.after(500, update_dynamic_fields)
+
+    # Inicia a verificação automática
+    update_dynamic_fields()
+
+    # Botão para postar
     post_button = ctk.CTkButton(
-        main_frame, 
-        text="Postar", 
+        main_frame,
+        text="Postar",
         corner_radius=5,
-        command=lambda: execute_uploads(selected_networks, upload_functions)
+        command=lambda: execute_uploads_post(selected_networks, upload_functions)
     )
-    post_button.pack(pady=5)
+    post_button.pack(pady=10)
 
 # ------------------------------------------------------------------------------
-#                    Funções Vinculadas aos Switches
+#                    Funções Vinculadas aos Switches | Posts
 # ------------------------------------------------------------------------------
-def execute_uploads(selected_networks, upload_functions):
+def execute_uploads_post(selected_networks, upload_functions):
+    """Executa as funções de upload para as redes sociais selecionadas."""
+    if not selected_networks:
+        messagebox.showwarning("Aviso", "Nenhuma rede social foi selecionada!")
+        return
+
+    # Obter os valores diretamente dos campos de entrada
+    text = post_box.get("1.0", "end-1c")
+
+    # Verificar se os campos obrigatórios estão preenchidos
+    if not text:
+        messagebox.showerror("Erro", "Por favor, preencha todos os campos obrigatórios!")
+        return
+
+    # Iterar sobre as redes sociais selecionadas
+    for network in selected_networks:
+        if network in upload_functions:
+            try:
+                print(f"Iniciando upload para {network}...")
+                
+                # Captura o título do Reddit, se existir
+                title = title_entries.get("Reddit")
+                title_text = title.get() if title else ""
+            
+                # Passa o título apenas se for Reddit
+                if network == "Reddit":
+                    upload_functions[network](text, title_text)
+                else:
+                    upload_functions[network](text)
+            
+                title = title_entries.get(network, None)
+                upload_functions[network](text)
+
+                print(f"Upload concluído para {network}.")
+            except Exception as e:
+                print(f"Erro ao fazer upload para {network}: {e}")
+        else:
+            print(f"Nenhuma função de upload configurada para {network}.")
+
+# ------------------------------------------------------------------------------
+#                    Funções Vinculadas aos Switches | Vídeos
+# ------------------------------------------------------------------------------
+def execute_uploads_video(selected_networks, upload_functions):
     """Executa as funções de upload para as redes sociais selecionadas."""
     if not selected_networks:
         messagebox.showwarning("Aviso", "Nenhuma rede social foi selecionada!")
@@ -811,7 +1065,7 @@ def interface_upload(right_frame, selected_networks, upload_functions):
         right_frame,
         text="Postar",
         corner_radius=5,
-        command=lambda: execute_uploads(selected_networks, upload_functions)
+        command=lambda: execute_uploads_video(selected_networks, upload_functions)
     ).grid(row=6, column=0, columnspan=2, pady=10)
     
 create_menu()
