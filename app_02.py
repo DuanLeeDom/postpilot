@@ -539,7 +539,7 @@ def post_x_twitter(post_box):
 #                     POST REDDIT | SELENIUM
 # ========================================================================
 
-def post_reddit(post_box):
+def post_reddit(post_box, title_post=None):
     try:
         global driver
         driver = get_driver()
@@ -560,17 +560,31 @@ def post_reddit(post_box):
         post_box_element = driver.find_element(By.XPATH, '/html/body/shreddit-app/reddit-header-large/reddit-header-action-items/header/nav/div[3]/div[1]/span[3]/create-post-entry-point-wrapper/faceplate-tracker/faceplate-tooltip/a')
         post_box_element.click()
 
-        time.sleep(3)
+        time.sleep(5)
+        # Criar no seu proprio subreddit
+        post_community = driver.find_element(By.xpa, '//*[@id="dropdown-button"]')
+        post_community.click()
+        
+        time.sleep(2)
+        post_community.send_keys(Keys.TAB)
+        post_community.send_keys(Keys.ENTER)
+
+        time.sleep(2)
         title_box = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[1]/fieldset/div[1]/faceplate-tracker/faceplate-textarea-input')
         title_box.click()
-        title_box.send_keys(title_label_main)
+        # title_box.send_keys(title_post)
 
-        time.sleep(3)
-        post_box = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[2]/fieldset/faceplate-tracker/shreddit-composer/div')
-        post_box.click()
-        post_box.send_keys(post_box)
+        if title_post != None:
+            title_box.send_keys(title_post)  # Preenche o título se existir
+        else:
+            title_box.send_keys("Título Padrão")  # Caso não tenha título, usa um padrão
 
-        time.sleep(3)
+        time.sleep(2)
+        post_text = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[2]/fieldset/faceplate-tracker/shreddit-composer/div/p')
+        post_text.click()
+        post_text.send_keys(post_box)
+
+        time.sleep(2)
         post_click = driver.find_element(By.XPATH, '/html/body/shreddit-app/div[1]/div[1]/div/main/r-post-composer-form/section/faceplate-form-section[6]/div/div/r-post-form-submit-button[1]')
         post_click.click()
 
@@ -848,11 +862,11 @@ def interface_posts(frame, selected_networks, upload_functions):
         for network in upload_functions.keys():
             if network == "Reddit" and network in selected_networks and network not in title_entries:
                 # Adiciona o campo SE a rede estiver ativada
-                title_entry = ctk.CTkEntry(main_frame, placeholder_text=f"Título para {network}", width=600)
-                title_entry.pack(pady=5, before=post_box)  # Coloca antes do Textbox
+                title_post = ctk.CTkEntry(main_frame, placeholder_text=f"Título para {network}", width=600)
+                title_post.pack(pady=5, before=post_box)  # Coloca antes do Textbox
 
                 # Salva no dicionário
-                title_entries[network] = title_entry
+                title_entries[network] = title_post
                 active_titles.append(f"Título para {network}")
 
             elif network in title_entries and (network != "Reddit" or network not in selected_networks):
@@ -913,6 +927,48 @@ def execute_uploads_post(selected_networks, upload_functions):
             
                 title = title_entries.get(network, None)
                 upload_functions[network](text)
+
+                print(f"Upload concluído para {network}.")
+            except Exception as e:
+                print(f"Erro ao fazer upload para {network}: {e}")
+        else:
+            print(f"Nenhuma função de upload configurada para {network}.")
+
+# ------------------------------------------------------------------------------
+#                    Funções Vinculadas aos Switches | Post
+# ------------------------------------------------------------------------------
+def execute_uploads_post(selected_networks, upload_functions):
+    """Executa as funções de upload para as redes sociais selecionadas."""
+    if not selected_networks:
+        messagebox.showwarning("Aviso", "Nenhuma rede social foi selecionada!")
+        return
+
+    # Obter os valores diretamente dos campos de entrada
+    text = post_box.get("1.0", "end-1c")
+
+    # Verificar se os campos obrigatórios estão preenchidos
+    if not text:
+        messagebox.showerror("Erro", "Por favor, preencha todos os campos obrigatórios!")
+        return
+
+    # Dicionário para armazenar títulos das redes sociais
+    titles_dict = {}
+
+    # Captura o título do Reddit, se existir
+    if "Reddit" in title_entries:
+        titles_dict["Reddit"] = title_entries["Reddit"].get()
+
+    # Iterar sobre as redes sociais selecionadas
+    for network in selected_networks:
+        if network in upload_functions:
+            try:
+                print(f"Iniciando upload para {network}...")
+
+                # Se for Reddit, passa o título armazenado
+                if network == "Reddit":
+                    upload_functions[network](text, titles_dict.get("Reddit", "Título Padrão"))
+                else:
+                    upload_functions[network](text)
 
                 print(f"Upload concluído para {network}.")
             except Exception as e:
