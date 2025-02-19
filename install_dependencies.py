@@ -10,7 +10,8 @@ def install_python_dependencies():
         "webdriver-manager",
         "customtkinter",
         "tkcalendar",
-        "Pillow"
+        "Pillow",
+        "psutil"
     ]
     for dep in dependencies:
         subprocess.check_call([sys.executable, "-m", "pip", "install", dep])
